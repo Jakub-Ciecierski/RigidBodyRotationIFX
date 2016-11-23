@@ -6,8 +6,8 @@
 #include <memory>
 
 namespace ifx{
-class Scene;
-class SceneWindowGUI;
+class Renderer;
+class EngineGUI;
 }
 
 struct RigidBodySimulationCreateParams;
@@ -18,7 +18,7 @@ public:
 
     RigidBodyGUI(GLFWwindow* window,
                  std::shared_ptr<RigidBodySimulation> simulation,
-                 std::shared_ptr<ifx::Scene> scene);
+                 std::shared_ptr<ifx::Renderer> renderer);
     ~RigidBodyGUI();
 
     virtual void Render() override;
@@ -37,7 +37,7 @@ private:
     std::shared_ptr<RigidBodySimulation> simulation_;
     std::shared_ptr<RigidBodySimulationCreateParams> simulation_create_params_;
 
-    std::shared_ptr<ifx::SceneWindowGUI> scene_window_gui_;
+    std::shared_ptr<ifx::EngineGUI> engine_gui_;
 };
 
 

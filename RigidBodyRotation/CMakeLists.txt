@@ -84,6 +84,9 @@ include_directories($ENV{IFX_ROOT}/modules/libs/logic/game_loop/${INC_DIR})
 add_subdirectory($ENV{IFX_ROOT}/modules/libs/gui/gui ./build/gui/gui)
 include_directories($ENV{IFX_ROOT}/modules/libs/gui/gui/${INC_DIR})
 
+add_subdirectory($ENV{IFX_ROOT}/modules/libs/gui/engine_gui ./build/gui/engine_gui)
+include_directories($ENV{IFX_ROOT}/modules/libs/gui/engine_gui/${INC_DIR})
+
 #----------------------------------
 # EXTERNAL
 #----------------------------------
@@ -115,7 +118,7 @@ target_link_libraries(${APP_NAME}
         rendering_ifx shaders_ifx math_ifx
         lighting_ifx object_ifx resources_ifx controls_ifx
         vr_ifx game_loop_ifx
-        gui_ifx)
+        engine_gui_ifx gui_ifx)
 
 target_link_libraries(${APP_NAME} SOIL)
 target_link_libraries(${APP_NAME} assimp)

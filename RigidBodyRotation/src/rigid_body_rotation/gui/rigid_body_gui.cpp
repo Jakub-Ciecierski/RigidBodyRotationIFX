@@ -1,16 +1,19 @@
 #include <rigid_body_rotation/rigid_body_simulation.h>
 #include "rigid_body_rotation/gui/rigid_body_gui.h"
 
-#include <math/math_ifx.h>
-#include <rendering/scene/scene_gui.h>
+#include "engine_gui/engine_gui.h"
+#include "engine_gui/factory/engine_gui_factory.h"
+
+#include <rendering/renderer.h>
+
 #include <gui/imgui/imgui.h>
 
 RigidBodyGUI::RigidBodyGUI(GLFWwindow* window,
                            std::shared_ptr<RigidBodySimulation> simulation,
-                           std::shared_ptr<ifx::Scene> scene) :
+                           std::shared_ptr<ifx::Renderer> renderer) :
         ifx::GUI(window),
         simulation_(simulation){
-    scene_window_gui_.reset(new ifx::SceneWindowGUI(scene));
+    engine_gui_ = ifx::EngineGUIFactory().CreateEngineGUI(renderer);
 
     simulation_create_params_
             = std::shared_ptr<RigidBodySimulationCreateParams>(
@@ -29,7 +32,7 @@ void RigidBodyGUI::Render(){
     NewFrame();
 
     RenderGUI();
-    scene_window_gui_->Render();
+    engine_gui_->Render();
 
     ImGui::Render();
 }

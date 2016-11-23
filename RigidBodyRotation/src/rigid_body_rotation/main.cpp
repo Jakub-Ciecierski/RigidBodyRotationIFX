@@ -43,7 +43,7 @@ void InitGUI(ifx::GameLoop& game_loop,
     auto gui = std::unique_ptr<RigidBodyGUI>(new RigidBodyGUI(
             game_loop.renderer()->window()->getHandle(),
             simulation,
-            game_loop.renderer()->scene()));
+            game_loop.renderer()));
     game_loop.renderer()->SetGUI(std::move(gui));
 }
 
