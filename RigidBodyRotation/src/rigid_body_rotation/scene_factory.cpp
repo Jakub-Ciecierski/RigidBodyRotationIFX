@@ -4,6 +4,7 @@
 #include <factory/render_object_factory.h>
 #include <factory/texture_factory.h>
 #include <factory/program_factory.h>
+#include <model_loader/model_loader.h>
 
 SceneFactory::SceneFactory(){
 
@@ -17,6 +18,7 @@ SceneFactoryObjects SceneFactory::CreateSceneObjects(){
     SceneFactoryObjects scene_factory_objects;
 
     scene_factory_objects.cube = CreateCube();
+    scene_factory_objects.diagonal = CreateDiagonalVector();
     scene_factory_objects.axis = CreateAxis();
     scene_factory_objects.gravity_vector = CreateGravityVector();
     scene_factory_objects.gravity_plane = CreateGravityPlane();
@@ -32,7 +34,29 @@ std::shared_ptr<ifx::RenderObject> SceneFactory::CreateCube(){
                     CreateCubeModel()));
 
     render_object->addProgram(program);
-    render_object->rotateTo(glm::vec3(0, 45, 54.75));
+    render_object->rotateTo(glm::vec3(0,
+                                      glm::degrees(atan(1)),
+                                      glm::degrees(asin(sqrt(2L)/sqrt(3L)))));
+
+    return render_object;
+}
+
+std::shared_ptr<ifx::RenderObject> SceneFactory::CreateDiagonalVector(){
+    std::shared_ptr<Program> program = ifx::ProgramFactory().LoadMainProgram();
+
+    std::string path
+            = ifx::Resources::GetInstance().GetResourcePath(
+                    "vectors/y/vector.obj", ifx::ResourceType::MODEL);
+    auto model = ifx::ModelLoader(path).loadModel();
+    auto render_object
+            = std::shared_ptr<ifx::RenderObject>(new ifx::RenderObject(
+                    ObjectID(0, "Diagonal"), model));
+    render_object->addProgram(program);
+    render_object->scale(glm::vec3(1, 1*sqrt(3),1));
+
+    auto q = glm::quat(glm::vec3(0, (atan(1L)), (asin(sqrt(2L)/sqrt(3L)))));
+    q = glm::normalize(q);
+    render_object->rotateTo(glm::degrees(glm::eulerAngles(glm::inverse(q))));
 
     return render_object;
 }
@@ -63,7 +87,19 @@ std::shared_ptr<ifx::RenderObject> SceneFactory::CreateAxis(){
 }
 
 std::shared_ptr<ifx::RenderObject> SceneFactory::CreateGravityVector(){
-    return std::shared_ptr<ifx::RenderObject>();
+    std::shared_ptr<Program> program = ifx::ProgramFactory().LoadMainProgram();
+
+    std::string path
+            = ifx::Resources::GetInstance().GetResourcePath(
+                    "vectors/x/vector.obj", ifx::ResourceType::MODEL);
+    auto model = ifx::ModelLoader(path).loadModel();
+    auto render_object
+            = std::shared_ptr<ifx::RenderObject>(new ifx::RenderObject(
+                    ObjectID(0, "Force"), model));
+    render_object->addProgram(program);
+    render_object->rotateTo(glm::vec3(180,0,0));
+
+    return render_object;
 }
 
 std::shared_ptr<ifx::RenderObject> SceneFactory::CreateGravityPlane(){
@@ -147,6 +183,7 @@ std::unique_ptr<ifx::Mesh> SceneFactory::CreateCubeMesh() {
 
     std::unique_ptr<ifx::Mesh> mesh(new ifx::Mesh(vertices, indices));
     auto material = std::make_shared<ifx::Material>();
+    material->alpha = 0.3f;
     material->AddTexture(ifx::TextureFactory().LoadContainerDiffuse());
     material->AddTexture(ifx::TextureFactory().LoadContainerSpecular());
 

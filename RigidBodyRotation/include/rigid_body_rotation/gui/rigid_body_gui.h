@@ -30,6 +30,7 @@ private:
     void RenderCubeParametersDimension();
     void RenderCubeParametersDensity();
     void RenderCubeParametersAngularVelocity();
+    void RenderCubeParametersDiagonalRotation();
 
     void RenderTrajectoryParemeters();
     void RenderGravityParemeters();

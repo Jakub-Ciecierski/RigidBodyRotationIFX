@@ -11,6 +11,7 @@ class RenderObject;
 
 struct SceneFactoryObjects {
     std::shared_ptr<ifx::RenderObject> cube;
+    std::shared_ptr<ifx::RenderObject> diagonal;
     std::shared_ptr<ifx::RenderObject> axis;
     std::shared_ptr<ifx::RenderObject> gravity_vector;
     std::shared_ptr<ifx::RenderObject> gravity_plane;
@@ -26,6 +27,7 @@ public:
 
 private:
     std::shared_ptr<ifx::RenderObject> CreateCube();
+    std::shared_ptr<ifx::RenderObject> CreateDiagonalVector();
     std::shared_ptr<ifx::RenderObject> CreateAxis();
     std::shared_ptr<ifx::RenderObject> CreateGravityVector();
     std::shared_ptr<ifx::RenderObject> CreateGravityPlane();

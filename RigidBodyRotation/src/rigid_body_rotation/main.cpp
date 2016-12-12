@@ -28,14 +28,25 @@ void InitSimulation(ifx::GameLoop& game_loop){
 void InitScene(ifx::GameLoop& game_loop,
                SceneFactoryObjects& scene_factory_objects){
     auto scene = game_loop.renderer()->scene();
-    if(scene_factory_objects.cube)
-        scene->AddRenderObject(scene_factory_objects.cube);
+    scene->camera()->rotateTo(glm::vec3(-118, -10, 0));
+    scene->camera()->moveTo(glm::vec3(2.78, 1.77, 4.71));
+
+    auto floor = ifx::RenderObjectFactory().CreateFloor();
+    floor->move(glm::vec3(0, -3, 0));
+    floor->scale(10);
+    scene->AddRenderObject(std::move(floor));
+
+    if(scene_factory_objects.diagonal)
+        scene->AddRenderObject(scene_factory_objects.diagonal);
     if(scene_factory_objects.axis)
         scene->AddRenderObject(scene_factory_objects.axis);
     if(scene_factory_objects.gravity_plane)
         scene->AddRenderObject(scene_factory_objects.gravity_plane);
     if(scene_factory_objects.gravity_vector)
         scene->AddRenderObject(scene_factory_objects.gravity_vector);
+
+    if(scene_factory_objects.cube)
+        scene->AddRenderObject(scene_factory_objects.cube);
 }
 
 void InitGUI(ifx::GameLoop& game_loop,
@@ -45,6 +56,8 @@ void InitGUI(ifx::GameLoop& game_loop,
             simulation,
             game_loop.renderer()));
     game_loop.renderer()->SetGUI(std::move(gui));
+
+    //game_loop.renderer()->LimitFPS(true);
 }
 
 int main() {
