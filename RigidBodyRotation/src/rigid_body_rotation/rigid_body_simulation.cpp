@@ -62,11 +62,11 @@ void RigidBodySimulation::Update(double elapsed){
 }
 
 void RigidBodySimulation::UpdateViewObjects(){
-    views_.cube->scale(cube_.dimensions);
+    views_.cube->scale(cube_.dimensions.x);
     views_.diagonal->scale(glm::vec3(1, cube_.GetDiagonalLength(), 1));
 
-    views_.diagonal->rotateTo(inertia_data_.GetDiagonalRotation());
-    views_.cube->rotateTo(inertia_data_.GetCubeRotation());
+    views_.diagonal->rotateTo((glm::vec3)inertia_data_.GetDiagonalRotation());
+    views_.cube->rotateTo((glm::vec3)inertia_data_.GetCubeRotation());
 }
 
 void RigidBodySimulation::ResetTimeData(){
@@ -77,8 +77,8 @@ void RigidBodySimulation::ResetTimeData(){
 }
 
 void RigidBodySimulation::ResetInertiaTensorData(){
-    glm::vec3 center = ComputeCenterOfMass(cube_);
-    glm::mat3 tensor = ComputeIntertiaTensorAroundOrigin(cube_);
+    glm::highp_dvec3 center = ComputeCenterOfMass(cube_);
+    glm::highp_dmat3 tensor = ComputeIntertiaTensorAroundOrigin(cube_);
 
     inertia_data_.diagonal_body = GetDiagonalVector();
     inertia_data_.center_body = GetRotationQuatInitial() * center;
@@ -86,28 +86,36 @@ void RigidBodySimulation::ResetInertiaTensorData(){
     inertia_data_.inertia_tensor_body
             = GetRotationMatrixInitial()
               * tensor * glm::transpose(GetRotationMatrixInitial());
+/*
+    inertia_data_.inertia_tensor_body[1].x = 0;
+    inertia_data_.inertia_tensor_body[2].x = 0;
+    inertia_data_.inertia_tensor_body[0].y = 0;
+    inertia_data_.inertia_tensor_body[2].y = 0;
+    inertia_data_.center_body[0] = 0;
+    inertia_data_.center_body[2] = 0;
+*/
     inertia_data_.inertia_tensor_inv_body
             = glm::inverse(inertia_data_.inertia_tensor_body);
     inertia_data_.force
-            = glm::vec3(0, -ComputeMass(cube_) * cube_.gravity_force, 0);
+            = glm::highp_dvec3(0, -ComputeMass(cube_) * cube_.gravity_force, 0);
 
     inertia_data_.quat_rotation_current
-            = glm::normalize(glm::quat(glm::vec3(
+            = glm::normalize(glm::highp_dquat(glm::highp_dvec3(
             0, 0, glm::radians(cube_.diagonal_rotation_initial))));
 
     inertia_data_.angular_velocity_current
             = inertia_data_.diagonal_body * cube_.angular_velocity_initial;
 
     std::cout << "Tensor (Rotated): " << std::endl;
-    ifx::PrintMat3(inertia_data_.inertia_tensor_body);
+    ifx::PrintMat3((glm::mat3)inertia_data_.inertia_tensor_body);
     std::cout << std::endl;
 
     std::cout << "Center (Rotated): " << std::endl;
-    ifx::PrintVec3(inertia_data_.center_body);
+    ifx::PrintVec3((glm::vec3)inertia_data_.center_body);
     std::cout << std::endl;
 
     std::cout << "Angular Velocity " << std::endl;
-    ifx::PrintVec3(inertia_data_.angular_velocity_current);
+    ifx::PrintVec3((glm::vec3)inertia_data_.angular_velocity_current);
     std::cout << std::endl;
 }
 
@@ -121,7 +129,7 @@ void RigidBodySimulation::SetSceneObjects(
 Cube RigidBodySimulation::GetDefaultCube(){
     Cube cube;
 
-    cube.dimensions = glm::vec3(1,1,1);
+    cube.dimensions = glm::highp_dvec3(1,1,1);
     cube.density = 1.0;
     cube.angular_velocity_initial = 0;
     cube.diagonal_rotation_initial = 0;

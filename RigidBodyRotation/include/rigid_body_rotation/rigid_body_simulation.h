@@ -17,20 +17,18 @@ struct Views {
 };
 
 struct InertiaData{
-    glm::mat3 inertia_tensor_body;
-    glm::mat3 inertia_tensor_inv_body;
+    glm::highp_dmat3 inertia_tensor_body;
+    glm::highp_dmat3 inertia_tensor_inv_body;
 
-    glm::vec3 center_body;
-    glm::vec3 diagonal_body;
-    glm::vec3 force;
+    glm::highp_dvec3 center_body;
+    glm::highp_dvec3 diagonal_body;
+    glm::highp_dvec3 force;
 
     // along transformed diagonal
-    glm::vec3 angular_velocity_current;
-    glm::quat quat_rotation_current;
+    glm::highp_dvec3 angular_velocity_current;
+    glm::highp_dquat quat_rotation_current;
 
-    glm::quat qt;
-
-    glm::vec3 GetCubeRotation(){
+    glm::highp_dvec3 GetCubeRotation(){
         auto Q = quat_rotation_current * GetRotationQuatInitial();
         auto current = glm::degrees(glm::eulerAngles((Q)));
         return current;
@@ -40,7 +38,7 @@ struct InertiaData{
         return current;*/
     }
 
-    glm::vec3 GetDiagonalRotation(){
+    glm::highp_dvec3 GetDiagonalRotation(){
         /*
         auto Q = quat_rotation_current * glm::inverse(GetRotationQuatInitial());
         auto current = glm::degrees(glm::eulerAngles((Q)));*/
@@ -49,8 +47,8 @@ struct InertiaData{
         return current;
     }
 
-    glm::vec3 GetForceRotation(){
-        auto initial = glm::vec3(180,0,0);
+    glm::highp_dvec3 GetForceRotation(){
+        auto initial = glm::highp_dvec3(180,0,0);
         auto current
                 = -glm::degrees(
                         glm::eulerAngles((glm::inverse(quat_rotation_current))));
@@ -59,13 +57,13 @@ struct InertiaData{
 };
 
 struct TimeData{
-    float last_time;
-    float current_time;
+    double last_time;
+    double current_time;
 
-    float total_time;
+    double total_time;
 
-    float time_since_last_update;
-    const float time_delta = 1.0f / 60.0f;
+    double time_since_last_update;
+    const double time_delta = 1.0f / 60.0f;
 };
 
 class RigidBodySimulation : public ifx::Simulation {

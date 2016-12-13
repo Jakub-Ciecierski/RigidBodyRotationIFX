@@ -11,8 +11,8 @@ double ComputeMass(Cube& cube){
             cube.dimensions.z;
 }
 
-glm::vec3 ComputeCenterOfMass(Cube& cube){
-    glm::vec3 center_of_mass;
+glm::highp_dvec3 ComputeCenterOfMass(Cube& cube){
+    glm::highp_dvec3 center_of_mass;
     center_of_mass.x = cube.dimensions.x / 2.0;
     center_of_mass.y = cube.dimensions.y / 2.0;
     center_of_mass.z = cube.dimensions.z / 2.0;
@@ -21,20 +21,20 @@ glm::vec3 ComputeCenterOfMass(Cube& cube){
     return center_of_mass;
 }
 
-glm::mat3 ComputeIntertiaTensorAroundOrigin(Cube& cube){
-    glm::mat3 inertia_tensor;
-    float a = cube.dimensions.x;
-    float b = cube.dimensions.y;
-    float c = cube.dimensions.z;
+glm::highp_dmat3 ComputeIntertiaTensorAroundOrigin(Cube& cube){
+    glm::highp_dmat3 inertia_tensor;
+    double a = cube.dimensions.x;
+    double b = cube.dimensions.y;
+    double c = cube.dimensions.z;
 
-    float abc = a*b*c;
-    float a_sqr = a*a;
-    float b_sqr = b*b;
-    float c_sqr = c*c;
+    double abc = a*b*c;
+    double a_sqr = a*a;
+    double b_sqr = b*b;
+    double c_sqr = c*c;
 
-    float xy = -0.25f * a_sqr * b_sqr * c;
-    float xz = -0.25 * a_sqr * b * c_sqr;
-    float yz = -0.25 * a * b_sqr * c_sqr;
+    double xy = -0.25f * a_sqr * b_sqr * c;
+    double xz = -0.25 * a_sqr * b * c_sqr;
+    double yz = -0.25 * a * b_sqr * c_sqr;
 
     inertia_tensor[0].x = 0.333f * abc * (b_sqr + c_sqr);
     inertia_tensor[0].y = yz;
@@ -53,43 +53,43 @@ glm::mat3 ComputeIntertiaTensorAroundOrigin(Cube& cube){
     return inertia_tensor;
 }
 
-EulerOutput EulerEquation(const glm::quat& Q0, const glm::vec3& W0,
+EulerOutput EulerEquation(const glm::highp_dquat& Q0, const glm::highp_dvec3& W0,
                           const EulerInputConst& in_const){
     return EulerOutput{W1(Q0, W0, in_const),
                        Q1(Q0, W0, in_const)};
 }
 
-glm::vec3 W1(const glm::quat& Q0, const glm::vec3& W0,
+glm::highp_dvec3 W1(const glm::highp_dquat& Q0, const glm::highp_dvec3& W0,
              const EulerInputConst& in_const){
     auto h = in_const.dt;
 
     auto k1 = Wt(Q0, W0, in_const);
-    auto k2 = Wt(Q0, W0 + (k1 * h / 2.0f), in_const);
-    auto k3 = Wt(Q0, W0 + (k2 * h / 2.0f), in_const);
+    auto k2 = Wt(Q0, W0 + (k1 * h / 2.0), in_const);
+    auto k3 = Wt(Q0, W0 + (k2 * h / 2.0), in_const);
     auto k4 = Wt(Q0, W0 + (k3 * h), in_const);
 
-    auto m = (k1 + (k2*2.0f) + (k3*2.0f) + k4) * (1.0f/6.0f);
+    auto m = (k1 + (k2*2.0) + (k3*2.0) + k4) * (1.0/6.0);
     auto W1 = W0 + (h * m);
 
     return W1;
 }
 
-glm::quat Q1(const glm::quat& Q0, const glm::vec3& W0,
+glm::highp_dquat Q1(const glm::highp_dquat& Q0, const glm::highp_dvec3& W0,
              const EulerInputConst& in_const){
     auto h = in_const.dt;
 
     auto k1 = Qt(Q0, W0);
-    auto k2 = Qt(Q0 + (k1 * h / 2.0f), W0);
-    auto k3 = Qt(Q0 + (k2 * h / 2.0f), W0);
+    auto k2 = Qt(Q0 + (k1 * h / 2.0), W0);
+    auto k3 = Qt(Q0 + (k2 * h / 2.0), W0);
     auto k4 = Qt(Q0 + (k3 * h), W0);
 
-    auto m = (k1 + (k2*2.0f) + (k3*2.0f) + k4) * (1.0f/6.0f);
+    auto m = (k1 + (k2*2.0) + (k3*2.0) + k4) * (1.0/6.0);
     auto Q1 = Q0 + (h * m);
 
     return Q1;
 }
 
-glm::vec3 Wt(const glm::quat& Q, const glm::vec3& W,
+glm::highp_dvec3 Wt(const glm::highp_dquat& Q, const glm::highp_dvec3& W,
              const EulerInputConst& in_const){
     //auto Q_norm = glm::normalize(Q);
     auto Q_norm = Q;
@@ -101,15 +101,15 @@ glm::vec3 Wt(const glm::quat& Q, const glm::vec3& W,
     return in_const.inertia_tensor_inv * (N + a);
 }
 
-glm::quat Qt(const glm::quat& Q, const glm::vec3& W){
+glm::highp_dquat Qt(const glm::highp_dquat& Q, const glm::highp_dvec3& W){
     //auto Q_norm = glm::normalize(Q);
     auto Q_norm = Q;
-    auto Qw = glm::quat(0, W.x, W.y, W.z);
+    auto Qw = glm::highp_dquat(0, W.x, W.y, W.z);
 
-    return Q_norm * Qw * 0.5f;
+    return Q_norm * Qw * 0.5;
 }
 
-glm::vec3 Torque(const glm::quat& Q,
+glm::highp_dvec3 Torque(const glm::highp_dquat& Q,
                  const EulerInputConst& in_const){
     auto C = in_const.center;
     auto f = in_const.force;

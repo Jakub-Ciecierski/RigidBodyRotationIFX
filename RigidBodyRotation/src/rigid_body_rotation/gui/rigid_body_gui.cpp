@@ -86,20 +86,29 @@ void RigidBodyGUI::RenderCubeParametersDimension(){
 }
 
 void RigidBodyGUI::RenderCubeParametersDensity(){
+    static float c = cube_.density;
     ImGui::SliderFloat("Density",
-                       (float*)&cube_.density, 1, 5);
+                       &c, 1, 5);
+    cube_.density = c;
 }
 
 void RigidBodyGUI::RenderCubeParametersAngularVelocity(){
+    static float c = cube_.angular_velocity_initial;
+
     ImGui::SliderFloat("Angular Velocity (Around diagonal)",
-                       (float*)&cube_.angular_velocity_initial,
+                       &c,
                        0, 20);
+
+    cube_.angular_velocity_initial = c;
 }
 
 void RigidBodyGUI::RenderCubeParametersDiagonalRotation(){
+    static float c = cube_.diagonal_rotation_initial;
     ImGui::SliderFloat("Diagonal Rotation",
-                       (float*)&cube_.diagonal_rotation_initial,
+                       &c,
                        0, 360);
+
+    cube_.diagonal_rotation_initial = c;
 }
 
 void RigidBodyGUI::RenderTrajectoryParemeters(){
@@ -108,16 +117,18 @@ void RigidBodyGUI::RenderTrajectoryParemeters(){
 }
 
 void RigidBodyGUI::RenderGravityParemeters(){
+    static float c = cube_.gravity_force;
     ImGui::SliderFloat("Gravity",
-                       &cube_.gravity_force,
+                       &c,
                        0, 20);
 
     if (ImGui::Button("0.00")) {
-        cube_.gravity_force = 0.0;
+        c = 0.0;
     }
     ImGui::SameLine();
     if (ImGui::Button("9.81")) {
-        cube_.gravity_force = 9.81;
+        c = 9.81;
     }
 
+    cube_.gravity_force = c;
 }

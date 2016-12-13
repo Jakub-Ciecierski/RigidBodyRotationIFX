@@ -11,36 +11,36 @@
 struct Cube;
 
 double ComputeMass(Cube& cube);
-glm::vec3 ComputeCenterOfMass(Cube& cube);
-glm::mat3 ComputeIntertiaTensorAroundOrigin(Cube& cube);
+glm::highp_dvec3 ComputeCenterOfMass(Cube& cube);
+glm::highp_dmat3 ComputeIntertiaTensorAroundOrigin(Cube& cube);
 
 struct EulerOutput{
-    glm::vec3 angular_velocity;
-    glm::quat quaternion;
-    glm::quat qt;
+    glm::highp_dvec3 angular_velocity;
+    glm::highp_dquat quaternion;
+    glm::highp_dquat qt;
 };
 
 struct EulerInputConst{
-    glm::vec3 center;
-    glm::vec3 force;
-    glm::mat3 inertia_tensor;
-    glm::mat3 inertia_tensor_inv;
-    float dt;
+    glm::highp_dvec3 center;
+    glm::highp_dvec3 force;
+    glm::highp_dmat3 inertia_tensor;
+    glm::highp_dmat3 inertia_tensor_inv;
+    double dt;
 };
 
-EulerOutput EulerEquation(const glm::quat& Q0, const glm::vec3& W0,
+EulerOutput EulerEquation(const glm::highp_dquat& Q0, const glm::highp_dvec3& W0,
                           const EulerInputConst& in_const);
 
-glm::vec3 W1(const glm::quat& Q0, const glm::vec3& W0,
-             const EulerInputConst& in_const);
-glm::quat Q1(const glm::quat& Q0, const glm::vec3& W0,
-             const EulerInputConst& in_const);
+glm::highp_dvec3 W1(const glm::highp_dquat& Q0, const glm::highp_dvec3& W0,
+                    const EulerInputConst& in_const);
+glm::highp_dquat Q1(const glm::highp_dquat& Q0, const glm::highp_dvec3& W0,
+                    const EulerInputConst& in_const);
 
-glm::vec3 Wt(const glm::quat& Q, const glm::vec3& W,
-             const EulerInputConst& in_const);
-glm::quat Qt(const glm::quat& Q, const glm::vec3& W);
+glm::highp_dvec3 Wt(const glm::highp_dquat& Q, const glm::highp_dvec3& W,
+                    const EulerInputConst& in_const);
+glm::highp_dquat Qt(const glm::highp_dquat& Q, const glm::highp_dvec3& W);
 
-glm::vec3 Torque(const glm::quat& Q,
-                 const EulerInputConst& in_const);
+glm::highp_dvec3 Torque(const glm::highp_dquat& Q,
+                        const EulerInputConst& in_const);
 
 #endif //PROJECT_INERTIA_CALCULATIONS_H

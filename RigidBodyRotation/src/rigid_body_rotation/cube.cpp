@@ -1,21 +1,22 @@
 #include <rigid_body_rotation/cube.h>
 
-glm::vec3 GetRotationAnglesInitial(){
-    return glm::vec3(0,
-                     glm::degrees(atan(1L)),
-                     glm::degrees(asin(sqrt(2L)/sqrt(3L))));
+glm::highp_dvec3 GetRotationAnglesInitial(){
+    return glm::highp_dvec3(0.0,
+                     glm::degrees(atan(1.0)),
+                     glm::degrees(asin(sqrt(2.0)/sqrt(3.0))));
 };
 
 // From origin (x,y,z) to starting rotated frame (X,Y,Z).
 // Change of basis matrix, where diagonal is aligned with y axis
-glm::mat3 GetRotationMatrixInitial(){
+glm::highp_dmat3 GetRotationMatrixInitial(){
     return glm::mat3_cast(GetRotationQuatInitial());
 };
 
-glm::quat GetRotationQuatInitial(){
-    return glm::normalize(glm::quat(glm::radians(GetRotationAnglesInitial())));
+glm::highp_dquat GetRotationQuatInitial(){
+    return glm::normalize(glm::highp_dquat(
+            glm::radians(GetRotationAnglesInitial())));
 }
 
-glm::vec3 GetDiagonalVector(){
-    return glm::vec3(0L, 1L, 0L);
+glm::highp_dvec3 GetDiagonalVector(){
+    return glm::highp_dvec3(0.0, 1.0, 0.0);
 }
