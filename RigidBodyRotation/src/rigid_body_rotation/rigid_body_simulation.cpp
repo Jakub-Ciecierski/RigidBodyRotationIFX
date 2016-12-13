@@ -7,22 +7,22 @@
 #include <math/print_math.h>
 
 RigidBodySimulation::RigidBodySimulation(
-        SceneFactoryObjects& scene_factory_objects) :
-        grivity_on_(true){
+        SceneFactoryObjects& scene_factory_objects){
     SetSceneObjects(scene_factory_objects);
-    auto params = GetDefaultParameters();
-    Reset(params);
+
+    auto cube = GetDefaultCube();
+    Reset(cube);
+
     Pause();
 }
 
 RigidBodySimulation::~RigidBodySimulation(){}
 
-void RigidBodySimulation::Reset(
-        std::shared_ptr<RigidBodySimulationCreateParams> create_params){
+void RigidBodySimulation::Reset(Cube& cube){
+    cube_ = cube;
     ResetTimeData();
-    ResetCubeData(create_params);
     ResetInertiaTensorData();
-    ResetViewObjects();
+    UpdateViewObjects();
 }
 
 void RigidBodySimulation::Update(){
@@ -47,6 +47,7 @@ void RigidBodySimulation::Update(double elapsed){
             inertia_data_.center_body,
             inertia_data_.force,
             inertia_data_.inertia_tensor_body,
+            inertia_data_.inertia_tensor_inv_body,
             time_data_.time_delta
     };
     auto euler_output = EulerEquation(inertia_data_.quat_rotation_current,
@@ -57,48 +58,15 @@ void RigidBodySimulation::Update(double elapsed){
     inertia_data_.quat_rotation_current
             = glm::normalize(euler_output.quaternion);
 
-    /*
-    std::cout << "Velocity: " << std::endl;
-    ifx::PrintVec3(inertia_data_.angular_velocity_current);
-    std::cout << "Quat: " << std::endl;
-    ifx::PrintQuat(inertia_data_.quat_rotation_current);*/
-/*
-    cube_.diagonal_render_object->rotateTo(
-            glm::degrees(glm::eulerAngles(
-                    inertia_data_.quat_rotation_current)));*/
-    /*
-    cube_.render_object->rotateTo(
-            cube_.GetRotationAngles() +
-            glm::degrees(glm::eulerAngles(
-                    inertia_data_.quat_rotation_current)));
-*/
-    cube_.diagonal_render_object->rotateTo(
-            glm::degrees(glm::eulerAngles(
-                    inertia_data_.quat_rotation_current)));
-    cube_.render_object->rotateTo(
-            glm::degrees(
-                    glm::eulerAngles(inertia_data_.quat_rotation_current)));
+    UpdateViewObjects();
 }
 
-void RigidBodySimulation::SetSceneObjects(
-        SceneFactoryObjects& scene_factory_objects){
-    cube_.render_object = scene_factory_objects.cube;
-    cube_.diagonal_render_object = scene_factory_objects.diagonal;
-    cube_.force_render_object = scene_factory_objects.gravity_vector;
-}
+void RigidBodySimulation::UpdateViewObjects(){
+    views_.cube->scale(cube_.dimensions);
+    views_.diagonal->scale(glm::vec3(1, cube_.GetDiagonalLength(), 1));
 
-std::shared_ptr<RigidBodySimulationCreateParams>
-RigidBodySimulation::GetDefaultParameters(){
-    auto params = std::shared_ptr<RigidBodySimulationCreateParams>(
-            new RigidBodySimulationCreateParams());
-    params->dimensions = glm::vec3(1,1,1);
-    params->density = 1.0;
-    params->angular_velocity = 0;
-    params->diagonal_rotation = 0;
-    params->gravity_force = 9.81;
-    params->gravity_on = true;
-
-    return params;
+    views_.diagonal->rotateTo(inertia_data_.GetDiagonalRotation());
+    views_.cube->rotateTo(inertia_data_.GetCubeRotation());
 }
 
 void RigidBodySimulation::ResetTimeData(){
@@ -108,58 +76,57 @@ void RigidBodySimulation::ResetTimeData(){
     time_data_.last_time = glfwGetTime();
 }
 
-void RigidBodySimulation::ResetCubeData(
-        std::shared_ptr<RigidBodySimulationCreateParams> create_params){
-    cube_.dimensions = create_params->dimensions;
-    cube_.density = create_params->density;
-    cube_.angular_velocity_initial = create_params->angular_velocity;
-    cube_.diagonal_rotation_initial = create_params->diagonal_rotation;
-
-    cube_.gravity_force = create_params->gravity_force;
-    cube_.gravity_on = create_params->gravity_on;
-}
-
 void RigidBodySimulation::ResetInertiaTensorData(){
     glm::vec3 center = ComputeCenterOfMass(cube_);
     glm::mat3 tensor = ComputeIntertiaTensorAroundOrigin(cube_);
 
-    inertia_data_.change_of_basis_matrix = cube_.GetRotationMatrix();
-    inertia_data_.diagonal_body = cube_.GetDiagonalVector();
-    inertia_data_.center_body = inertia_data_.change_of_basis_matrix * center;
+    inertia_data_.diagonal_body = GetDiagonalVector();
+    inertia_data_.center_body = GetRotationQuatInitial() * center;
+
     inertia_data_.inertia_tensor_body
-            = inertia_data_.change_of_basis_matrix *
-              tensor * glm::transpose(inertia_data_.change_of_basis_matrix);
+            = GetRotationMatrixInitial()
+              * tensor * glm::transpose(GetRotationMatrixInitial());
+    inertia_data_.inertia_tensor_inv_body
+            = glm::inverse(inertia_data_.inertia_tensor_body);
     inertia_data_.force
             = glm::vec3(0, -ComputeMass(cube_) * cube_.gravity_force, 0);
 
-    inertia_data_.quat_rotation_current = cube_.GetRotationQuat();
     inertia_data_.quat_rotation_current
-            = glm::quat(glm::vec3(0, 0,
-                                glm::radians(cube_.diagonal_rotation_initial)))
-            * inertia_data_.quat_rotation_current;
-    inertia_data_.quat_rotation_current
-            = glm::normalize(inertia_data_.quat_rotation_current);
+            = glm::normalize(glm::quat(glm::vec3(
+            0, 0, glm::radians(cube_.diagonal_rotation_initial))));
 
     inertia_data_.angular_velocity_current
-            = inertia_data_.diagonal_body
-              * inertia_data_.angular_velocity_current;
+            = inertia_data_.diagonal_body * cube_.angular_velocity_initial;
 
-    //ifx::PrintQuat(inertia_data_.quat_rotation_current);
+    std::cout << "Tensor (Rotated): " << std::endl;
+    ifx::PrintMat3(inertia_data_.inertia_tensor_body);
+    std::cout << std::endl;
+
+    std::cout << "Center (Rotated): " << std::endl;
+    ifx::PrintVec3(inertia_data_.center_body);
+    std::cout << std::endl;
+
+    std::cout << "Angular Velocity " << std::endl;
+    ifx::PrintVec3(inertia_data_.angular_velocity_current);
+    std::cout << std::endl;
 }
 
-void RigidBodySimulation::ResetViewObjects(){
-    cube_.render_object->scale(cube_.dimensions);
-    cube_.diagonal_render_object->scale(
-            glm::vec3(1, cube_.dimensions.x*sqrt(3),1));
+void RigidBodySimulation::SetSceneObjects(
+        SceneFactoryObjects& scene_factory_objects){
+    views_.cube = scene_factory_objects.cube;
+    views_.diagonal = scene_factory_objects.diagonal;
+    views_.force = scene_factory_objects.gravity_vector;
+}
 
-    cube_.diagonal_render_object->
-            rotateTo(glm::degrees(glm::eulerAngles(
-            glm::quat(
-                    glm::vec3(
-                            0, 0,
-                            glm::radians(cube_.diagonal_rotation_initial))))));
+Cube RigidBodySimulation::GetDefaultCube(){
+    Cube cube;
 
-    cube_.render_object->rotateTo(
-            glm::degrees(
-                    glm::eulerAngles(inertia_data_.quat_rotation_current)));
+    cube.dimensions = glm::vec3(1,1,1);
+    cube.density = 1.0;
+    cube.angular_velocity_initial = 0;
+    cube.diagonal_rotation_initial = 0;
+    cube.gravity_force = 9.81;
+    cube.trajectory_display_count = 1000;
+
+    return cube;
 }

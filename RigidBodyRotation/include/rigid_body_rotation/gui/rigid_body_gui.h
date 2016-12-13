@@ -2,6 +2,7 @@
 #define PROJECT_RIGID_BODY_GUI_H
 
 #include <gui/gui.h>
+#include <rigid_body_rotation/cube.h>
 
 #include <memory>
 
@@ -10,7 +11,7 @@ class Renderer;
 class EngineGUI;
 }
 
-struct RigidBodySimulationCreateParams;
+struct Cube;
 class RigidBodySimulation;
 
 class RigidBodyGUI : public ifx::GUI {
@@ -36,7 +37,7 @@ private:
     void RenderGravityParemeters();
 
     std::shared_ptr<RigidBodySimulation> simulation_;
-    std::shared_ptr<RigidBodySimulationCreateParams> simulation_create_params_;
+    Cube cube_;
 
     std::shared_ptr<ifx::EngineGUI> engine_gui_;
 };
