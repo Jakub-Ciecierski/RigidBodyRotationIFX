@@ -114,6 +114,7 @@ void RigidBodyGUI::RenderCubeParametersDiagonalRotation(){
 void RigidBodyGUI::RenderTrajectoryParemeters(){
     ImGui::SliderInt("Trajectory length",
                      &cube_.trajectory_display_count, 1, 10000);
+    ImGui::Checkbox("Show", simulation_->show_trajectory());
 }
 
 void RigidBodyGUI::RenderGravityParemeters(){

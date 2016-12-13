@@ -11,6 +11,7 @@ struct Cube {
     double gravity_force;
 
     int trajectory_display_count;
+    bool render_trajectory;
 
     double GetDiagonalLength(){
         return dimensions.x*sqrt(3.0);

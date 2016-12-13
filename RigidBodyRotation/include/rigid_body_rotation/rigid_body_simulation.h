@@ -8,12 +8,18 @@
 
 #include <memory>
 
+namespace ifx{
+class Scene;
+}
+
 struct SceneFactoryObjects;
 
 struct Views {
     std::shared_ptr<ifx::RenderObject> cube;
     std::shared_ptr<ifx::RenderObject> diagonal;
     std::shared_ptr<ifx::RenderObject> force;
+
+    std::shared_ptr<ifx::RenderObject> trajectory;
 };
 
 struct InertiaData{
@@ -69,11 +75,13 @@ struct TimeData{
 class RigidBodySimulation : public ifx::Simulation {
 public:
 
-    RigidBodySimulation(SceneFactoryObjects& scene_factory_objects);
+    RigidBodySimulation(SceneFactoryObjects& scene_factory_objects,
+                        std::shared_ptr<ifx::Scene> scene);
     ~RigidBodySimulation();
 
     Cube& cube(){return cube_;}
     double total_time(){return time_data_.total_time;}
+    bool* show_trajectory(){return &(cube_.render_trajectory);}
 
     void Reset(Cube& cube);
     virtual void Update() override;
@@ -92,10 +100,16 @@ private:
     void SetSceneObjects(SceneFactoryObjects& scene_factory_objects);
     Cube GetDefaultCube();
 
+    void UpdateTrajectory();
+    void ResetTrajectoryView();
+
     Cube cube_;
     InertiaData inertia_data_;
     TimeData time_data_;
     Views views_;
+
+    std::vector<glm::vec3> trajectory_;
+    std::shared_ptr<ifx::Scene> scene_;
 };
 
 

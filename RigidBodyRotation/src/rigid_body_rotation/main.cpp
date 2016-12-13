@@ -17,7 +17,8 @@ void InitSimulation(ifx::GameLoop& game_loop){
     auto scene_factory_objects
             = SceneFactory().CreateSceneObjects();
     auto simulation = std::shared_ptr<RigidBodySimulation>(
-            new RigidBodySimulation(scene_factory_objects));
+            new RigidBodySimulation(scene_factory_objects,
+                                    game_loop.renderer()->scene()));
 
     game_loop.AddSimulation(simulation);
 
