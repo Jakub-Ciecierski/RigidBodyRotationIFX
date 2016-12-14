@@ -41,6 +41,8 @@ void RigidBodySimulation::Update(){
 
     if(time_data_.time_since_last_update >= time_data_.time_delta){
         time_data_.time_since_last_update = 0.0f;
+        //int iters = 10;
+        //for(int i = 0; i < iters; i++)
         Update(elapsed);
     }
 }
@@ -92,14 +94,16 @@ void RigidBodySimulation::ResetInertiaTensorData(){
     inertia_data_.inertia_tensor_body
             = GetRotationMatrixInitial()
               * tensor * glm::transpose(GetRotationMatrixInitial());
-/*
+
     inertia_data_.inertia_tensor_body[1].x = 0;
     inertia_data_.inertia_tensor_body[2].x = 0;
     inertia_data_.inertia_tensor_body[0].y = 0;
     inertia_data_.inertia_tensor_body[2].y = 0;
+    inertia_data_.inertia_tensor_body[1].z = 0;
+
     inertia_data_.center_body[0] = 0;
     inertia_data_.center_body[2] = 0;
-*/
+
     inertia_data_.inertia_tensor_inv_body
             = glm::inverse(inertia_data_.inertia_tensor_body);
     inertia_data_.force
@@ -140,7 +144,7 @@ Cube RigidBodySimulation::GetDefaultCube(){
     cube.angular_velocity_initial = 0;
     cube.diagonal_rotation_initial = 0;
     cube.gravity_force = 9.81;
-    cube.trajectory_display_count = 1000;
+    cube.trajectory_display_count = 10000;
     cube.render_trajectory = true;
 
     return cube;

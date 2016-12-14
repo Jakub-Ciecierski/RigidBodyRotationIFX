@@ -69,7 +69,7 @@ struct TimeData{
     double total_time;
 
     double time_since_last_update;
-    const double time_delta = 1.0f / 60.0f;
+    const double time_delta = 1.0f / 100.0f;
 };
 
 class RigidBodySimulation : public ifx::Simulation {

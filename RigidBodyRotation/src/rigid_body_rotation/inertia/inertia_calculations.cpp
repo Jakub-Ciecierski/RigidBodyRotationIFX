@@ -55,8 +55,27 @@ glm::highp_dmat3 ComputeIntertiaTensorAroundOrigin(Cube& cube){
 
 EulerOutput EulerEquation(const glm::highp_dquat& Q0, const glm::highp_dvec3& W0,
                           const EulerInputConst& in_const){
-    return EulerOutput{W1(Q0, W0, in_const),
-                       Q1(Q0, W0, in_const)};
+    auto h = in_const.dt;
+
+    auto k1 = Wt(Q0, W0, in_const);
+    auto q1 = Qt(Q0, W0);
+
+    auto k2 = Wt(Q0 + (q1 * h / 2.0), W0 + (k1 * h / 2.0), in_const);
+    auto q2 = Qt(Q0 + (q1 * h / 2.0), W0 + (k1 * h / 2.0));
+
+    auto k3 = Wt(Q0 + (q2 * h / 2.0), W0 + (k2 * h / 2.0), in_const);
+    auto q3 = Qt(Q0 + (q2 * h / 2.0), W0 + (k2 * h / 2.0));
+
+    auto k4 = Wt(Q0 + (q3 * h), W0 + (k3 * h), in_const);
+    auto q4 = Qt(Q0 + (q3 * h), W0 + (k3 * h));
+
+    auto km = (k1 + (k2*2.0) + (k3*2.0) + k4) * (1.0/6.0);
+    auto W1 = W0 + (h * km);
+
+    auto qm = (q1 + (q2*2.0) + (q3*2.0) + q4) * (1.0/6.0);
+    auto Q1 = Q0 + (h * qm);
+
+    return EulerOutput{W1, Q1};
 }
 
 glm::highp_dvec3 W1(const glm::highp_dquat& Q0, const glm::highp_dvec3& W0,
@@ -75,7 +94,7 @@ glm::highp_dvec3 W1(const glm::highp_dquat& Q0, const glm::highp_dvec3& W0,
 }
 
 glm::highp_dquat Q1(const glm::highp_dquat& Q0, const glm::highp_dvec3& W0,
-             const EulerInputConst& in_const){
+                    const EulerInputConst& in_const){
     auto h = in_const.dt;
 
     auto k1 = Qt(Q0, W0);
