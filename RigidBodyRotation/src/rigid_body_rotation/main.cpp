@@ -1,4 +1,4 @@
-#include <game_loop/game_loop.h>
+#include <game/game_loop.h>
 #include <factory/render_object_factory.h>
 #include <rendering/renderer.h>
 
@@ -6,6 +6,7 @@
 #include <rigid_body_rotation/gui/rigid_body_gui.h>
 #include <rigid_body_rotation/scene_factory.h>
 #include <rigid_body_rotation/rigid_body_simulation.h>
+#include <game/factory/game_loop_factory.h>
 
 void InitSimulation(ifx::GameLoop& game_loop);
 void InitScene(ifx::GameLoop& game_loop,
@@ -62,11 +63,9 @@ void InitGUI(ifx::GameLoop& game_loop,
 }
 
 int main() {
-    ifx::GameLoop game_loop(
-            std::move(ifx::RenderObjectFactory().CreateRenderer()));
+    auto game_loop = ifx::GameLoopFactory().Create();
+    InitSimulation(*game_loop.get());
 
-    InitSimulation(game_loop);
-
-    game_loop.Start();
+    game_loop->Start();
 }
 
